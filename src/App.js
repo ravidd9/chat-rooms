@@ -3,8 +3,11 @@ import React, { Component } from 'react';
 import {
   handleInput,
   connectToChatkit,
+  connectToRoom,
+  sendMessage,
 } from './methods';
 import Dialog from './components/Dialog';
+import RoomList from './components/RoomList';
 
 import 'skeleton-css/css/normalize.css';
 import 'skeleton-css/css/skeleton.css';
@@ -27,7 +30,9 @@ class App extends Component {
     }
     this.handleInput = handleInput.bind(this);
     this.connectToChatkit = connectToChatkit.bind(this);
-
+    this.connectToChatkit = connectToChatkit.bind(this);
+    this.connectToRoom = connectToRoom.bind(this);
+    this.sendMessage = sendMessage.bind(this);
   }
 
   render() {
@@ -45,27 +50,50 @@ class App extends Component {
 
     return (
       <div className="App">
-            <aside className="sidebar left-sidebar">
-              {currentUser ? (
-                <div className="user-profile">
-                  <span className="username">{currentUser.name}</span>
-                  <span className="user-id">{`@${currentUser.id}`}</span>
-                </div>
-              ) : null}
-            </aside>
-            <section className="chat-screen">
-             // [..]
-            </section>
-            <aside className="sidebar right-sidebar">
-              {showLogin ? (
-                <Dialog
-                  userId={userId}
-                  handleInput={this.handleInput}
-                  connectToChatkit={this.connectToChatkit}
-                />
-              ) : null}
-            </aside>
-          </div>
+        <aside className="sidebar left-sidebar">
+          {currentUser ? (
+            <div className="user-profile">
+              <span className="username">{currentUser.name}</span>
+              <span className="user-id">{`@${currentUser.id}`}</span>
+            </div>
+          ) : null}
+          {currentRoom ? (
+            <RoomList
+              rooms={rooms}
+              currentRoom={currentRoom}
+              connectToRoom={this.connectToRoom}
+              currentUser={currentUser}
+            />
+          ) : null}
+        </aside>
+        <section className="chat-screen">
+          <header className="chat-header">
+            {currentRoom ? <h3>{roomName}</h3> : null}
+          </header>
+          <ul className="chat-messages"></ul>
+          <footer className="chat-footer">
+            <form onSubmit={this.sendMessage} className="message-form">
+              <input
+                type="text"
+                value={newMessage}
+                name="newMessage"
+                className="message-input"
+                placeholder="Type your message and hit ENTER to send"
+                onChange={this.handleInput}
+              />
+            </form>
+          </footer>
+        </section>
+        <aside className="sidebar right-sidebar">
+          {showLogin ? (
+            <Dialog
+              userId={userId}
+              handleInput={this.handleInput}
+              connectToChatkit={this.connectToChatkit}
+            />
+          ) : null}
+        </aside>
+      </div>
     );
   }
 }

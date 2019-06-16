@@ -9,6 +9,35 @@ function handleInput(event) {
     });
 }
 
+function connectToRoom(id = `23593584`) {
+    const { currentUser } = this.state;
+
+    this.setState({
+        messages: [],
+    });
+
+    return currentUser
+        .subscribeToRoom({
+            roomId: `${id}`,
+        })
+        .then(currentRoom => {
+            const roomName =
+                currentRoom.customData && currentRoom.customData.isDirectMessage
+                    ? currentRoom.customData.userIds.filter(
+                        id => id !== currentUser.id
+                    )[0]
+                    : currentRoom.name;
+
+            this.setState({
+                currentRoom,
+                roomUsers: currentRoom.users,
+                rooms: currentUser.rooms,
+                roomName,
+            });
+        })
+        .catch(console.error);
+}
+
 function connectToChatkit(event) {
     event.preventDefault();
 
@@ -47,11 +76,28 @@ function connectToChatkit(event) {
                             currentUser,
                             showLogin: false,
                             rooms: currentUser.rooms,
-                        }
+                        },
+                        () => connectToRoom.call(this)
                     );
                 });
         })
         .catch(console.error);
 }
 
-export { handleInput, connectToChatkit }
+function sendMessage(event) {
+    event.preventDefault();
+    const { newMessage, currentUser, currentRoom } = this.state;
+
+    if (newMessage.trim() === '') return;
+
+    currentUser.sendMessage({
+        text: newMessage,
+        roomId: `${currentRoom.id}`,
+    });
+
+    this.setState({
+        newMessage: '',
+    });
+}
+
+export { handleInput, connectToRoom, connectToChatkit, sendMessage }
