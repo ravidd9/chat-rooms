@@ -19,6 +19,24 @@ function connectToRoom(id = `23593584`) {
     return currentUser
         .subscribeToRoom({
             roomId: `${id}`,
+            messageLimit: 100,
+            hooks: {
+                onMessage: message => {
+                    this.setState({
+                        messages: [...this.state.messages, message],
+                    });
+                },
+                onPresenceChanged: () => {
+                    const { currentRoom } = this.state;
+                    this.setState({
+                        roomUsers: currentRoom.users.sort(a => {
+                            if (a.presence.state === 'online') return -1;
+
+                            return 1;
+                        }),
+                    });
+                },
+            },
         })
         .then(currentRoom => {
             const roomName =
